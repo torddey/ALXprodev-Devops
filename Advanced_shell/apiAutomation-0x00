@@ -1,12 +1,16 @@
 #!/bin/bash
 
+# Save API in a variable
 api_url="https://pokeapi.co/api/v2/pokemon/"
 
+# Make request and save response
 curl "$api_url" -o data.json 2>> error.txt
 
+
+# Add error handling
 if [ $? -eq 0 ]; then
     echo "Users fetched successfully"
 else
-    echo "$(date): API request failed" >> errors.txt
+    echo "$(date): API request failed" >> errors.txt #Log error in a file
     echo "Failed to fetch users from the API"
 fi

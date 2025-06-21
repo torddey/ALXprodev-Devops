@@ -1,0 +1,25 @@
+#!/bin/bash
+
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+INPUT_FILE="$SCRIPT_DIR/pikachu.json"
+
+# Check if the input file exists
+if [ ! -f "$INPUT_FILE" ]; then
+    echo "Error: $INPUT_FILE not found."
+    exit 1
+fi
+
+
+jq -r '[.name, .types[0].type.name, .weight, .height] | @tsv' "$INPUT_FILE" | \
+awk -F'\t' '{
+    name = $1;
+    type = $2;
+    weight_kg = $3 / 10;
+    height_m = $4 / 10;
+    
+    uname = toupper(substr(name, 1, 1)) substr(name, 2);
+    utype = toupper(substr(type, 1, 1)) substr(type, 2);
+
+    printf "%s is of type %s, weighs %skg, and is %sm tall.\n", uname, utype, weight_kg, height_m;
+}' 
