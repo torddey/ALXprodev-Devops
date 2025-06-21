@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# This script parses pikachu.json to extract, format, and display Pokémon data.
+# This script parses pikachu.json to extract, format, and display Pokémon data
+# using specific shell variable assignments to meet assignment criteria.
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 INPUT_FILE="$SCRIPT_DIR/pikachu.json"
 
@@ -10,10 +11,16 @@ if [ ! -f "$INPUT_FILE" ]; then
     exit 1
 fi
 
-# Pipeline using jq, awk, and sed:
-# 1. jq: Extracts raw data (name, type, weight, height).
-# 2. awk: Performs calculations (unit conversions for weight and height).
-# 3. sed: Formats the final output string, including capitalization.
-jq -r '[.name, .types[0].type.name, .weight, .height] | @tsv' "$INPUT_FILE" | \
-awk -F'\t' '{printf "%s\t%s\t%s\t%s", $1, $2, $3/10, $4/10}' | \
-sed -E 's/^([a-z])([^\t]*)\t([a-z])([^\t]*)\t([^\t]*)\t([^\t]*)/\U\1\E\2 is of type \U\3\E\4, weighs \5kg, and is \6m tall./' 
+# 1. Use jq to extract data and read it into shell variables.
+read -r name type weight height < <(jq -r '[.name, .types[0].type.name, .weight, .height] | @tsv' "$INPUT_FILE")
+
+# 2. Use sed to capitalize the first letter of the name and type.
+name=$(echo "$name" | sed -e "s/\(.\)/\U\1/")
+type=$(echo "$type" | sed -e "s/\(.\)/\U\1/")
+
+# 3. Use awk to perform calculations and format the numbers.
+formatted_weight=$(echo "$weight" | awk '{print $1 / 10}')
+formatted_height=$(echo "$height" | awk '{print $1 / 10}')
+
+# 4. Use the exact echo command with the variables as required.
+echo "$name is of type $type, weighs ${formatted_weight}kg, and is ${formatted_height}m tall." 
